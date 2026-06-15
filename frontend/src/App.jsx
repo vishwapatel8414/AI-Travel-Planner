@@ -100,7 +100,7 @@ export default function App() {
       {/* ૧. સાઇડબાર મેનુ */}
       <Sidebar activePage={activePage} setActivePage={setActivePage} />
 
-      <main className="flex-1 lg:pl-72 p-4 md:p-8">
+      <main className="flex-1 lg:pl-72 p-4 md:p-8 pb-24 md:pb-8">
         <div className="max-w-[1500px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-6 md:gap-8 items-start">
           
           {/* 🏠 HOME PAGE સેક્શન */}
@@ -183,18 +183,19 @@ export default function App() {
           
         </div>
       </main>
-      {/* 📱 ફોન માટે સ્પેશિયલ બોટમ મેનુ પટ્ટી - તારો કોઈ જૂનો કોડ બદલ્યા વગર આ ખાલી નીચે ઉમેરી દે */}
-<div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex justify-around items-center z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-  <button onClick={() => setActiveTab("HOME")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider ${activeTab === "HOME" ? "text-[#4f46e5]" : "text-slate-400"}`}>
-    <span className="text-lg">🏠</span>HOME
-  </button>
-  <button onClick={() => setActiveTab("FLIGHTS")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider ${activeTab === "FLIGHTS" ? "text-[#4f46e5]" : "text-slate-400"}`}>
-    <span className="text-lg">✈️</span>FLIGHTS
-  </button>
-  <button onClick={() => setActiveTab("HOTELS")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider ${activeTab === "HOTELS" ? "text-[#4f46e5]" : "text-slate-400"}`}>
-    <span className="text-lg">🏨</span>HOTELS
-  </button>
-  <button onClick={() => setActiveTab("PLACES")} className="flex flex-col items-center gap-1 text-[10px] font-black">
+
+      {/* 📱 ફોન માટે સ્પેશિયલ બોટમ મેનુ પટ્ટી - તારા અસલી સ્ટેટ્સ (activePage) સાથે ૧૦૦% કનેક્ટેડ */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex justify-around items-center z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+        <button onClick={() => setActivePage("Home")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider transition-all ${activePage === "Home" ? "text-[#4f46e5] scale-105" : "text-slate-400"}`}>
+          <span className="text-lg">🏠</span>HOME
+        </button>
+        <button onClick={() => setActivePage("Flights")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider transition-all ${activePage === "Flights" ? "text-[#4f46e5] scale-105" : "text-slate-400"}`}>
+          <span className="text-lg">✈️</span>FLIGHTS
+        </button>
+        <button onClick={() => setActivePage("Hotels")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider transition-all ${activePage === "Hotels" ? "text-[#4f46e5] scale-105" : "text-slate-400"}`}>
+          <span className="text-lg">🏨</span>HOTELS
+        </button>
+        <button onClick={() => setActivePage("Places")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider transition-all ${activePage === "Places" ? "text-[#4f46e5] scale-105" : "text-slate-400"}`}>
           <span className="text-lg">📍</span>PLACES
         </button>
       </div>

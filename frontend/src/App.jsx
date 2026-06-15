@@ -18,28 +18,26 @@ export default function App() {
   const [activePage, setActivePage] = useState("Home");
   const [sharedSearchData, setSharedSearchData] = useState(null);
 
-  // 🚀 હોમ પેજ સાઇડબાર લાઈવ ઇન્સાઇટ્સ માટેના સ્ટેટ્સ
-  const [aiInsights, setAiInsights] = useState("Search a destination to get live premium travel insights and hidden gems automatically.");
-  const [insightsLoading, setInsightsLoading] = useState(false);
+  // 🚀 લાઈવ AI ડેટા સ્ટોર કરવા માટેના નવા સ્ટેટ્સ (States)
+  const [liveTravelData, setLiveTravelData] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // 🔑 .env માંથી Groq API Key લોડ કરવી
   const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
-  // 🛠️ હોમ પેજ પરથી સર્ચ થાય ત્યારે આ ફંક્શન રન થશે
-  const handlePlanSearch = (data) => {
+  // 🛠️ હોમ પેજ પરથી સર્ચ થાય ત્યારે આ મેઈન ફંક્શન રન થશે
+  const handlePlanSearch = async (data) => {
     setSharedSearchData(data);
+    setActivePage("Trip Planner"); // યુઝરને તરત જ પ્લાનર પેજ પર મોકલો
     
-    // પ્લાનર પેજ પર મોકલતા પહેલા હોમ પેજની ઇન્સાઇટ્સ બેકગ્રાઉન્ડમાં લોડ કરવી
-    fetchLiveInsights(data.destination);
-    
-    // યુઝરને પ્લાનર પેજ પર મોકલવો
-    setActivePage("Trip Planner");
+    // બેકગ્રાઉન્ડમાં આખા પ્રોજેક્ટનો અસલી ડેટા લોડ કરવો
+    await fetchCompleteDynamicPlan(data.destination, data.budget || "Budget Friendly", data.days || 3);
   };
 
-  // 🚀 Groq AI માંથી હોમ પેજ માટે લાઈવ ઇન્સાઇટ્સ લાવવાનું ફંક્શન
-  const fetchLiveInsights = async (dest) => {
-    if (!dest || !GROQ_API_KEY) return;
-    setInsightsLoading(true);
+  // 🚀 Llama 3.1 માંથી આખા પ્રોજેક્ટ માટે ૧૦૦% રિયલ અને લાઈવ ડેટા લાવવાનું માસ્ટર ફંક્શન
+  const fetchCompleteDynamicPlan = async (destination, budget, days) => {
+    if (!destination || !GROQ_API_KEY) return;
+    setAiLoading(true);
     try {
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -49,29 +47,50 @@ export default function App() {
         },
         body: JSON.stringify({
           model: "llama-3.1-8b-instant",
+          response_format: { type: "json_object" }, // આનાથી Groq હંમેશા પરફેક્ટ JSON જ આપશે
           messages: [
             {
               role: "system",
-              content: "You are a travel analyst. Give a 2-line direct premium travel advice, best season, or hidden gem for the city. No formatting, no asterisks."
+              content: `You are an expert real-time travel analyst. Generate a highly realistic, accurate, and geographically correct travel plan in JSON format based on the user's destination, budget, and duration. 
+              Do NOT use generic or fake placeholder names. All airlines, hotels, and places must be real and match the budget tier.
+              
+              Strictly return this exact JSON structure:
+              {
+                "destination": "City Name",
+                "flights": [
+                  { "airline": "Actual Airline Name", "estimated_price_in_inr": "Approx Price", "duration": "eg: 2h 30m" }
+                ],
+                "hotels": [
+                  { "hotel_name": "Actual Real Hotel Name", "rating": "4.4", "price_per_night_in_inr": "Approx Cost", "address": "Famous Area Name" }
+                ],
+                "places_to_visit": [
+                  { "place_name": "Real Tourist Landmark", "best_time_to_visit": "Morning", "description": "Short 1-line history/tip" }
+                ],
+                "itinerary": [
+                  { "day": 1, "theme": "Day Theme", "activities": ["Activity 1 at real place", "Lunch at local market", "Evening visit to real spot"] }
+                ]
+              }`
             },
             {
               role: "user",
-              content: `Give a quick travel insight and best time to visit for: ${dest}`
+              content: `Create a comprehensive travel guide and itinerary for "${destination}" for ${days} days with a "${budget}" budget constraint.`
             }
           ],
-          temperature: 0.4,
-          max_tokens: 150
+          temperature: 0.3,
+          max_tokens: 3000
         })
       });
 
       const resData = await response.json();
       if (response.ok && resData.choices?.[0]?.message?.content) {
-        setAiInsights(resData.choices[0].message.content.trim());
+        // AI ના કાચા લખાણને અસલી JavaScript Object માં ફેરવો
+        const finalJson = JSON.parse(resData.choices[0].message.content);
+        setLiveTravelData(finalJson);
       }
     } catch (err) {
-      console.error("Insights Error:", err);
+      console.error("Master AI Error:", err);
     } finally {
-      setInsightsLoading(false);
+      setAiLoading(false);
     }
   };
 
@@ -88,47 +107,28 @@ export default function App() {
           {activePage === "Home" && (
             <>
               <div className="xl:col-span-3 space-y-6 md:space-y-8">
-                {/* 🚀 TARGET UPDATE 1: Hero ની અંદર sharedData સિંક કર્યો */}
                 <Hero onSearchSubmit={handlePlanSearch} sharedData={sharedSearchData} />
-                
-                {/* 🚀 TARGET UPDATE 2: StatsCards ની અંદર પ્રોપ સેટ થઈ ગયો */}
                 <StatsCards sharedData={sharedSearchData} />
-                
                 <DestinationCards />
               </div>
               
-              {/* જમણી બાજુનું ઓરિજિનલ સાઇડબાર */}
               <div className="xl:col-span-1 space-y-6 sticky top-6 h-fit">
                 <AIChat />
                 <TravelStats />
                 
-                {/* 📊 Advanced Travel Stats & Insights */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider">
-                    📊 Advanced Travel Stats & Insights
+                    📊 Live AI System Insights
                   </h3>
-                  
-                  <div className="grid grid-cols-2 gap-3 text-center pt-1">
-                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                      <span className="block text-[10px] font-extrabold text-slate-400 uppercase">Trips</span>
-                      <span className="text-sm font-black text-slate-800">{sharedSearchData ? "129" : "128"}</span>
-                    </div>
-                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                      <span className="block text-[10px] font-extrabold text-slate-400 uppercase">Countries</span>
-                      <span className="text-sm font-black text-slate-800">24</span>
-                    </div>
-                  </div>
-
                   <div className="bg-indigo-50/50 border border-indigo-100/50 p-3 rounded-xl">
                     <span className="inline-block text-[9px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider mb-1.5">
-                      💡 {sharedSearchData ? `${sharedSearchData.destination} Insight` : "Live Tip"}
+                      💡 Status
                     </span>
                     <p className="text-[11px] text-slate-600 font-semibold leading-relaxed">
-                      {insightsLoading ? "Fetching live trends from Groq..." : aiInsights}
+                      {aiLoading ? "Llama 3.1 is fetching live global data..." : liveTravelData ? `Successfully loaded dynamic data for ${liveTravelData.destination}!` : "Enter a destination to activate real-time AI mapping."}
                     </p>
                   </div>
                 </div>
-
               </div>
             </>
           )}
@@ -137,10 +137,10 @@ export default function App() {
           {activePage === "Trip Planner" && (
             <>
               <div className="xl:col-span-3">
-                <TripPlanner sharedData={sharedSearchData} />
+                <TripPlanner sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} />
               </div>
               <div className="xl:col-span-1 sticky top-6 h-fit">
-                <PlannerSidebar />
+                <PlannerSidebar liveData={liveTravelData} />
               </div>
             </>
           )}
@@ -149,10 +149,10 @@ export default function App() {
           {activePage === "Flights" && (
             <>
               <div className="xl:col-span-3">
-                <Flights sharedData={sharedSearchData} />
+                <Flights sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} />
               </div>
               <div className="xl:col-span-1 sticky top-6 h-fit">
-                <FlightSummary />
+                <FlightSummary liveData={liveTravelData} />
               </div>
             </>
           )}
@@ -161,10 +161,10 @@ export default function App() {
           {activePage === "Hotels" && (
             <>
               <div className="xl:col-span-3">
-                <Hotels sharedData={sharedSearchData} /> 
+                <Hotels sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} /> 
               </div>
               <div className="xl:col-span-1 sticky top-6 h-fit">
-                <HotelSidebar />
+                <HotelSidebar liveData={liveTravelData} />
               </div>
             </>
           )}
@@ -173,10 +173,10 @@ export default function App() {
           {activePage === "Places" && (
             <>
               <div className="xl:col-span-3">
-                <Places sharedData={sharedSearchData} />
+                <Places sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} />
               </div>
               <div className="xl:col-span-1 sticky top-6 h-fit">
-                <PlacesSidebar />
+                <PlacesSidebar liveData={liveTravelData} />
               </div>
             </>
           )}

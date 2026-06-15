@@ -21,10 +21,15 @@ export default function Flights({ sharedData, liveData, isLoading }) {
 
   // 🔄 આખા પ્રોજેક્ટનો માસ્ટર જાદુ: App.jsx ના ડેટાને તારી ઓરિજિનલ ડિઝાઇનમાં સિંક કરવો
   useEffect(() => {
-    // ૧. યુઝરે જે સિટી સર્ચ કરી છે તે સેટ કરો
+    // ૧. યુઝરે જે સિટી અને ડેટ સર્ચ કરી છે તે સેટ કરો
     const currentDest = sharedData?.destination || toCity;
     if (sharedData?.destination) {
       setToCity(sharedData.destination);
+    }
+    
+    // 🔥 અહિયાં જાદુ: જો App.jsx માંથી ડેટ આવે તો એને સેટ કરવી, નહિતર જૂની રાખવી
+    if (sharedData?.date) {
+      setDepDate(sharedData.date);
     }
 
     // ૨. સેફ્ટી ચેક: AI જો કી (Key) નું નામ બદલે તો પણ ડેટા પકડી લેશે
@@ -42,17 +47,17 @@ export default function Flights({ sharedData, liveData, isLoading }) {
         { label: "Lowest Emissions", price: `₹${basePrice}`, time: actualFlights[0]?.duration || "2h 30m", active: false },
       ]);
     } else {
-      // 🚀 બેસ્ટ ફોલબેક સેફ્ટી: જો હજી સર્ચ પ્રોસેસમાં હોય અથવા નવું સિટી હોય, તો પણ તે સિટીના રિયલ કોડ સાથે ડેટા લાઈવ થઈ જશે!
-      const airportCode = currentDest.substring(0, 3).toUpperCase();
+      // 🚀 બેસ્ટ ફોલબેક સેફ્ટી: જો હજી સર્ચ પ્રોસેસમાં હોય, તો મુંબઈના એરપોર્ટ કોડ (BOM) સાથે ફ્લાઇટ્સ લાઈવ થઈ જશે!
+      const airportCode = currentDest.toLowerCase().includes("mumbai") ? "BOM" : currentDest.substring(0, 3).toUpperCase();
       setFlightList([
         {
           logo: "✈️",
           airline: "IndiGo",
           depTime: "06:15 AM",
           depCode: "AMD",
-          arrTime: "08:00 AM",
+          arrTime: "07:30 AM",
           arrCode: airportCode,
-          duration: "1h 45m",
+          duration: "1h 15m",
           type: "Non-stop",
           price: "₹4,200",
           tag: "Cheapest",
@@ -62,11 +67,11 @@ export default function Flights({ sharedData, liveData, isLoading }) {
           airline: "Air India",
           depTime: "11:30 AM",
           depCode: "AMD",
-          arrTime: "01:15 PM",
+          arrTime: "12:45 PM",
           arrCode: airportCode,
-          duration: "1h 45m",
+          duration: "1h 15m",
           type: "Non-stop",
-          price: "₹6,500",
+          price: "₹5,800",
           tag: "Best",
         },
         {
@@ -74,11 +79,11 @@ export default function Flights({ sharedData, liveData, isLoading }) {
           airline: "Vistara",
           depTime: "05:45 PM",
           depCode: "AMD",
-          arrTime: "07:30 PM",
+          arrTime: "07:00 PM",
           arrCode: airportCode,
-          duration: "1h 45m",
+          duration: "1h 15m",
           type: "Non-stop",
-          price: "₹7,800",
+          price: "₹6,900",
           tag: "Fastest",
         }
       ]);
@@ -92,7 +97,7 @@ export default function Flights({ sharedData, liveData, isLoading }) {
 
   return (
     <div className="space-y-6">
-      {/* ૧. બેનર (તારી ઓરિજિનલ મસ્ત ડિઝાઇન) */}
+      {/* ૧. બેનર */}
       <div 
         className="relative h-[150px] w-full rounded-2xl overflow-hidden bg-cover bg-center p-6 flex flex-col justify-center text-white shadow-md group"
         style={{ backgroundImage: `url('https://images.unsplash.com/photo-1517479149777-5f3b1511d5ad?auto=format&fit=crop&w=1200&q=80')` }}
@@ -138,7 +143,7 @@ export default function Flights({ sharedData, liveData, isLoading }) {
         </div>
         <div className="px-2 border-r border-slate-100">
           <span className="text-[10px] font-bold text-slate-400 uppercase block">Departure</span>
-          <input type="text" value={depDate} onChange={(e) => setDepDate(e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent focus:outline-none w-full" />
+          <input type="text" value={depDate} onChange={(e) => setDepDate(e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent focus:outline-none w-full pt-0.5 border-b border-transparent focus:border-indigo-500" />
         </div>
         <div className="px-2 border-r border-slate-100">
           <span className="text-[10px] font-bold text-slate-400 uppercase block">Class</span>

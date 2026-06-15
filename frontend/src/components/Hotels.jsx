@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 
 export default function Hotels({ sharedData, liveData, isLoading }) {
   const [toCity, setToCity] = useState("Mumbai");
-  const [stayDates, setStayDates] = useState("11/07/2026");
+  
+  // 🎯 Tari demand pramane: Koi fix tarikh nahi, suruat mathi j ekdam khali!
+  const [stayDates, setStayDates] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Hotels");
   const [hotelList, setHotelList] = useState([]);
 
@@ -22,9 +24,12 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
       setToCity(sharedData.destination);
     }
 
+    // 🔥 100% Real-time Date Sync: Home page mathi je aavse ej set thase!
     const incomingDate = sharedData?.date || sharedData?.stayDates || sharedData?.depDate || sharedData?.departureDate;
     if (incomingDate) {
       setStayDates(incomingDate);
+    } else {
+      setStayDates("Select Stay Dates");
     }
 
     const imagesPool = [
@@ -78,6 +83,7 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
 
   return (
     <div className="space-y-6">
+      {/* 1. Luxury Banner */}
       <div className="relative h-[220px] md:h-[260px] w-full rounded-3xl overflow-hidden bg-cover bg-center p-8 md:p-12 flex flex-col justify-center text-white shadow-xl" style={{ backgroundImage: `url(${imageUrl})` }}>
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/20 to-transparent" />
         <div className="relative z-10 max-w-xl space-y-2">
@@ -86,7 +92,7 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
         </div>
       </div>
 
-      {/* 🚀 Active Search Button Fix */}
+      {/* 2. Search Box */}
       <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
         <div className="border-r border-slate-100 px-2"><span className="text-[10px] font-bold text-slate-400 uppercase block">Where to?</span><p className="text-sm font-bold text-slate-800 pt-0.5">{toCity}</p></div>
         <div className="border-r border-slate-100 px-2"><span className="text-[10px] font-bold text-slate-400 uppercase block">Dates</span><p className="text-sm font-bold text-indigo-600 pt-0.5">{stayDates}</p></div>
@@ -96,27 +102,29 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
         </button>
       </div>
 
+      {/* 3. Categories */}
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
         {categories.map((cat, idx) => (
-          <div key={idx} onClick={() => setSelectedCategory(cat.label)} className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer min-w-[140px] transition-all ${selectedCategory === cat.label ? "bg-indigo-50/50 border-indigo-200 text-indigo-600 font-bold scale-[1.02]" : "bg-white border-slate-100 text-slate-700"}`}>
+          <div key={idx} onClick={() => setSelectedCategory(cat.label)} className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer min-w-[140px] transition-all ${selectedCategory === cat.label ? "bg-indigo-50/50 border-indigo-200 text-indigo-600 font-bold scale-[1.02] shadow-sm" : "bg-white border-slate-100 text-slate-700 hover:border-slate-200"}`}>
             <span className="text-xl">{cat.icon}</span>
             <div><p className="text-xs font-bold leading-tight">{cat.label}</p></div>
           </div>
         ))}
       </div>
 
+      {/* 4. Hotel List */}
       <div className="space-y-4">
         {isLoading ? (
           <div className="bg-white p-12 rounded-2xl border border-slate-100 text-center space-y-3 shadow-sm"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" /><p className="text-xs font-bold text-slate-500 animate-pulse">Aggregating stays for {toCity}...</p></div>
         ) : (
           filteredHotels.map((hotel, idx) => (
             <div key={idx} className="bg-white rounded-2xl border border-slate-100/80 shadow-sm overflow-hidden flex flex-col md:flex-row gap-5 hover:shadow-md transition-all p-4">
-              <img src={hotel.image} alt={hotel.name} className="w-full md:w-64 h-48 object-cover rounded-xl" />
+              <img src={hotel.image} alt={hotel.name} className="w-full md:w-64 h-48 object-cover rounded-xl flex-shrink-0" />
               <div className="flex-1 flex flex-col justify-between py-1">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-lg font-black text-slate-800">{hotel.name}</h3>
-                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotel.name + " " + hotel.location)}`} target="_blank" rel="noopener noreferrer" className="text-[11px] text-indigo-600 font-extrabold flex items-center gap-1 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-xl shadow-sm">🗺️ View Map</a>
+                    <h3 className="text-lg font-black text-slate-800 tracking-tight">{hotel.name}</h3>
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotel.name + " " + hotel.location)}`} target="_blank" rel="noopener noreferrer" className="text-[11px] text-indigo-600 font-extrabold flex items-center gap-1 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-xl shadow-sm hover:scale-105">🗺️ View Map</a>
                   </div>
                   <p className="text-[11px] text-slate-400 font-semibold">📍 {hotel.location}</p>
                   <p className="text-xs font-bold text-slate-700">⭐ {hotel.rating} | {hotel.reviews}</p>
@@ -125,7 +133,7 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
               </div>
               <div className="flex flex-col justify-between items-end min-w-[140px] border-t md:border-t-0 md:border-l border-slate-50 pt-3 md:pt-0 md:pl-5">
                 <div className="text-right"><p className="text-xl font-black text-slate-800">{hotel.price}<span className="text-[10px] text-slate-400 font-bold"> / night</span></p><p className="text-[10px] text-slate-400 font-bold">{hotel.totalPrice}</p></div>
-                <button className="w-full bg-[#4f46e5] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-sm">View Details</button>
+                <div className="w-full"><button className="w-full bg-[#4f46e5] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-sm">View Details</button></div>
               </div>
             </div>
           ))

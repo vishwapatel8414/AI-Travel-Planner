@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 
-// 🚀 App.jsx માંથી આવતા liveData અને isLoading ને પ્રોપ્સમાં એડ કર્યા
 export default function Hotels({ sharedData, liveData, isLoading }) {
-  
-  // 🚀 તારા ઓરિજિનલ લાઈવ ડાયનેમિક સ્ટેટ્સ
+  // 🚀 લાઈવ ડાયનેમિક સ્ટેટ્સ
   const [toCity, setToCity] = useState("Manali");
   const [stayDates, setStayDates] = useState("12 June - 17 June");
   const [selectedCategory, setSelectedCategory] = useState("All Hotels");
 
-  // કેટેગરીઝ સ્ટેટ (તારી ઓરિજિનલ ડિઝાઇન)
+  // કેટેગરીઝ સ્ટેટ
   const [categories, setCategories] = useState([
     { label: "All Hotels", count: "Stays Found", icon: "🏨" },
     { label: "Luxury", count: "Premium", icon: "👑" },
@@ -17,44 +15,43 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
     { label: "Boutique", count: "Trendy", icon: "🏢" },
   ]);
 
-  // હોટેલ લિસ્ટ સ્ટેટ
+  // લાઈવ હોટેલ લિસ્ટ સ્ટેટ
   const [hotelList, setHotelList] = useState([]);
 
   const imageUrl = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80";
 
-  // 🔄 જ્યારે પણ App.jsx માંથી નવો લાઈવ ડેટા આવે ત્યારે તારી ડિઝાઇનમાં સિંક કરવાનો જાદુ
+  // 🔄 App.jsx ના માસ્ટર ડેટાને તારી ઓરિજિનલ ડિઝાઇનમાં સિંક કરવાનો જાદુ
   useEffect(() => {
-    if (sharedData && sharedData.destination) {
+    const currentDest = sharedData?.destination || toCity;
+    if (sharedData?.destination) {
       setToCity(sharedData.destination);
     }
 
     if (liveData && liveData.hotels && Array.isArray(liveData.hotels)) {
-      // અનસ્પ્લેશ ઈમેજીસનો પૂલ જે તેં બનાવ્યો હતો, તેને જાળવી રાખ્યો છે
       const imagesPool = [
         "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
         "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80",
         "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80"
       ];
 
-      // AI ના ડેટાને તારા ઓરિજિનલ ઓબ્જેક્ટના કી-સ્ટ્રક્ચર (name, location, price) સાથે મેપ કર્યો
       const updatedHotels = liveData.hotels.map((h, index) => {
-        const perNightPrice = h.price_per_night_in_inr || h.price || "5000";
-        // જો અંદર સ્ટ્રિંગમાં ₹ ના હોય તો એડ કરવું
+        const perNightPrice = h.price_per_night_in_inr || h.price || "4500";
         const formattedPrice = perNightPrice.toString().startsWith("₹") ? perNightPrice : `₹${perNightPrice}`;
-        const numericPrice = parseInt(perNightPrice.toString().replace(/[^0-9]/g, "")) || 5000;
+        const numericPrice = parseInt(perNightPrice.toString().replace(/[^0-9]/g, "")) || 4500;
+        const hotelRating = h.rating || "4.5";
 
         return {
           name: h.hotel_name || h.name || "Premium AI Hotel",
-          type: h.rating > 4.5 ? "Luxury" : "Budget", // ઓટોમેટીક કેટેગરી ફિલ્ટર સેફ્ટી
-          tag: h.rating > 4.5 ? "AI PREFERRED" : "GREAT VALUE",
-          tagColor: h.rating > 4.5 ? "bg-purple-600" : "bg-emerald-600",
-          location: h.address || h.location || `Near Center, ${liveData.destination}`,
-          rating: h.rating || "4.5",
-          reviews: `${Math.floor(Math.random() * 800) + 200} reviews`, // રિયલ લુક આપવા ડાયનેમિક રિવ્યુઝ
+          type: parseFloat(hotelRating) >= 4.6 ? "Luxury" : "Budget",
+          tag: parseFloat(hotelRating) >= 4.6 ? "AI PREFERRED" : "GREAT VALUE",
+          tagColor: parseFloat(hotelRating) >= 4.6 ? "bg-purple-600" : "bg-emerald-600",
+          location: h.address || h.location || `Near Center, ${currentDest}`,
+          rating: hotelRating,
+          reviews: `${Math.floor(Math.random() * 600) + 400} reviews`,
           price: formattedPrice,
-          totalPrice: `₹${numericPrice * 5} (5 nights)`, // 5 નાઇટ્સનું ઓટોમેટિક કેલ્ક્યુલેશન
+          totalPrice: `₹${numericPrice * 5} (5 nights)`,
           features: ["Free Wi-Fi", "Mountain View", "Room Service", "Breakfast Included"],
-          aiPick: h.rating > 4.5,
+          aiPick: parseFloat(hotelRating) >= 4.6,
           image: imagesPool[index % imagesPool.length]
         };
       });
@@ -62,10 +59,36 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
       setHotelList(updatedHotels);
       setSelectedCategory("All Hotels");
     } else {
-      // જો યુઝરે હજી કંઈ સર્ચ ના કર્યું હોય તો બેકઅપ તરીકે મનાલીનો તારો ઓરિજિનલ ડેટા
+      // 🚀 બેસ્ટ ફોલબેક સેફ્ટી: જો હજી સર્ચ પ્રોસેસમાં હોય, તો તે સિટીના નામ સાથે ડેટા ઓટો સેટ થઈ જશે!
       setHotelList([
-        { name: "The Grand Himalayan Resort", type: "Luxury", tag: "AI PREFERRED", tagColor: "bg-purple-600", location: "Mall Road, Manali, Himachal Pradesh", rating: "4.8", reviews: "1.1k reviews", price: "₹8,500", totalPrice: "₹42,500 (5 nights)", features: ["Free Wi-Fi", "Mountain View", "Pool", "Spa", "Heater"], aiPick: true, image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80" },
-        { name: "Adler Alpine Stay", type: "Budget", tag: "GREAT VALUE", tagColor: "bg-emerald-600", location: "Old Manali, Himachal Pradesh", rating: "4.5", reviews: "642 reviews", price: "₹3,200", totalPrice: "₹16,000 (5 nights)", features: ["Free Wi-Fi", "Breakfast Included", "Cafeteria"], aiPick: false, image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80" }
+        {
+          name: `${currentDest} Grand Plaza Resort`,
+          type: "Luxury",
+          tag: "AI PREFERRED",
+          tagColor: "bg-purple-600",
+          location: `Mall Road, ${currentDest}, India`,
+          rating: "4.8",
+          reviews: "1.1k reviews",
+          price: "₹7,500",
+          totalPrice: "₹37,500 (5 nights)",
+          features: ["Free Wi-Fi", "Mountain View", "Pool", "Spa", "Heater"],
+          aiPick: true,
+          image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
+        },
+        {
+          name: `${currentDest} Alpine Stay Lodge`,
+          type: "Budget",
+          tag: "GREAT VALUE",
+          tagColor: "bg-emerald-600",
+          location: `Old Town Area, ${currentDest}, India`,
+          rating: "4.5",
+          reviews: "642 reviews",
+          price: "₹3,200",
+          totalPrice: "₹16,000 (5 nights)",
+          features: ["Free Wi-Fi", "Breakfast Included", "Cafeteria"],
+          aiPick: false,
+          image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80",
+        }
       ]);
     }
   }, [liveData, sharedData]);
@@ -81,8 +104,7 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
 
   return (
     <div className="space-y-6">
-      
-      {/* ૧. લક્ઝુરિયસ બેનર (તારી ઓરિજિનલ સ્લાઈલ) */}
+      {/* ૧. લક્ઝુરિયસ બેનર */}
       <div 
         className="relative h-[220px] md:h-[260px] w-full rounded-3xl overflow-hidden bg-cover bg-center p-8 md:p-12 flex flex-col justify-center text-white shadow-xl"
         style={{ backgroundImage: `url(${imageUrl})` }}
@@ -99,7 +121,7 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
         </div>
       </div>
 
-      {/* ૨. હોટેલ સર્ચ બોક્સ (તારી ઓરિજિનલ ડિઝાઇન) */}
+      {/* ૨. હોટેલ સર્ચ બોક્સ */}
       <form onSubmit={handleLocalSearch} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
         <div className="border-r border-slate-100 px-2">
           <span className="text-[10px] font-bold text-slate-400 uppercase block">Where to?</span>

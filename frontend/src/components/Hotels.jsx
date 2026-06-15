@@ -20,20 +20,31 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
 
   const imageUrl = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80";
 
-  // 🔄 App.jsx ના માસ્ટર ડેટાને તારી ઓરિજિનલ ડિઝાઇનમાં સિંક કરવાનો જાદુ
+  // 🔄 આખા પ્રોજેક્ટનો અસલી જાદુ: App.jsx ના ડેટા અને તારીખને અહીં સિંક કરવા
   useEffect(() => {
+    // ૧. હોમ પેજ પરથી યુઝરે જે સિટી સર્ચ કર્યું છે તે સેટ કરો
     const currentDest = sharedData?.destination || toCity;
     if (sharedData?.destination) {
       setToCity(sharedData.destination);
     }
 
+    // ૨. 🔥 અસલી ડેટ સિંક: યુઝર હોમ પેજ પર જે તારીખ નાખશે, એ જ બેઠી અહીં સેટ થશે!
+    if (sharedData?.date) {
+      setStayDates(`${sharedData.date} (5 Nights)`);
+    } else if (sharedData?.stayDates) {
+      setStayDates(sharedData.stayDates);
+    }
+
+    // ૩. 🤖 ૧૦૦% રિયલ AI ડેટા કનેક્શન
     if (liveData && liveData.hotels && Array.isArray(liveData.hotels)) {
+      // તેં બનાવેલો અનસ્પ્લેશ ઈમેજીસનો પૂલ
       const imagesPool = [
         "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
         "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80",
         "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80"
       ];
 
+      // સીધો Groq AI માંથી આવેલો અસલી હોટેલ ડેટા તારી ડિઝાઇનમાં ગોઠવાશે
       const updatedHotels = liveData.hotels.map((h, index) => {
         const perNightPrice = h.price_per_night_in_inr || h.price || "4500";
         const formattedPrice = perNightPrice.toString().startsWith("₹") ? perNightPrice : `₹${perNightPrice}`;
@@ -42,15 +53,15 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
 
         return {
           name: h.hotel_name || h.name || "Premium AI Hotel",
-          type: parseFloat(hotelRating) >= 4.6 ? "Luxury" : "Budget",
-          tag: parseFloat(hotelRating) >= 4.6 ? "AI PREFERRED" : "GREAT VALUE",
-          tagColor: parseFloat(hotelRating) >= 4.6 ? "bg-purple-600" : "bg-emerald-600",
+          type: parseFloat(hotelRating) >= 4.5 ? "Luxury" : "Budget",
+          tag: parseFloat(hotelRating) >= 4.5 ? "AI PREFERRED" : "GREAT VALUE",
+          tagColor: parseFloat(hotelRating) >= 4.5 ? "bg-purple-600" : "bg-emerald-600",
           location: h.address || h.location || `Near Center, ${currentDest}`,
           rating: hotelRating,
           reviews: `${Math.floor(Math.random() * 600) + 400} reviews`,
           price: formattedPrice,
           totalPrice: `₹${numericPrice * 5} (5 nights)`,
-          features: ["Free Wi-Fi", "Mountain View", "Room Service", "Breakfast Included"],
+          features: ["Free Wi-Fi", "Room Service", "Breakfast Included", "Air Conditioned"],
           aiPick: parseFloat(hotelRating) >= 4.6,
           image: imagesPool[index % imagesPool.length]
         };
@@ -59,35 +70,49 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
       setHotelList(updatedHotels);
       setSelectedCategory("All Hotels");
     } else {
-      // 🚀 બેસ્ટ ફોલબેક સેફ્ટી: જો હજી સર્ચ પ્રોસેસમાં હોય, તો તે સિટીના નામ સાથે ડેટા ઓટો સેટ થઈ જશે!
+      // 🚀 બેકઅપ સેફ્ટી: જો હજી સર્ચ ના થયું હોય, તો ઓટોમેટીક યુઝરે લખેલા સિટીના નામ સાથે ડેટા સેટ થશે
       setHotelList([
         {
-          name: `${currentDest} Grand Plaza Resort`,
+          name: `The Taj Grand ${currentDest}`,
           type: "Luxury",
           tag: "AI PREFERRED",
           tagColor: "bg-purple-600",
-          location: `Mall Road, ${currentDest}, India`,
+          location: `Main Hub, ${currentDest}, India`,
           rating: "4.8",
-          reviews: "1.1k reviews",
-          price: "₹7,500",
-          totalPrice: "₹37,500 (5 nights)",
-          features: ["Free Wi-Fi", "Mountain View", "Pool", "Spa", "Heater"],
+          reviews: "1.2k reviews",
+          price: "₹9,500",
+          totalPrice: "₹47,500 (5 nights)",
+          features: ["Free Wi-Fi", "City View", "Pool", "Spa"],
           aiPick: true,
           image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
         },
         {
-          name: `${currentDest} Alpine Stay Lodge`,
+          name: `${currentDest} Comfort Inn`,
           type: "Budget",
           tag: "GREAT VALUE",
           tagColor: "bg-emerald-600",
-          location: `Old Town Area, ${currentDest}, India`,
-          rating: "4.5",
-          reviews: "642 reviews",
-          price: "₹3,200",
-          totalPrice: "₹16,000 (5 nights)",
+          location: `Station Road, ${currentDest}`,
+          rating: "4.3",
+          reviews: "512 reviews",
+          price: "₹3,100",
+          totalPrice: "₹15,500 (5 nights)",
           features: ["Free Wi-Fi", "Breakfast Included", "Cafeteria"],
           aiPick: false,
           image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80",
+        },
+        {
+          name: `Regency Heritage ${currentDest}`,
+          type: "Boutique",
+          tag: "BESTSELLER",
+          tagColor: "bg-blue-600",
+          location: `Tourist Street, ${currentDest}`,
+          rating: "4.5",
+          reviews: "840 reviews",
+          price: "₹5,400",
+          totalPrice: "₹27,000 (5 nights)",
+          features: ["Free Wi-Fi", "Room Service", "Gym"],
+          aiPick: false,
+          image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
         }
       ]);
     }
@@ -122,29 +147,23 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
       </div>
 
       {/* ૨. હોટેલ સર્ચ બોક્સ */}
-      <form onSubmit={handleLocalSearch} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
         <div className="border-r border-slate-100 px-2">
           <span className="text-[10px] font-bold text-slate-400 uppercase block">Where to?</span>
-          <input 
-            type="text" 
-            value={toCity} 
-            onChange={(e) => setToCity(e.target.value)} 
-            placeholder="Destination City"
-            className="text-sm font-bold text-slate-800 bg-transparent focus:outline-none w-full border-b border-transparent focus:border-indigo-500 pt-0.5"
-          />
+          <p className="text-sm font-bold text-slate-800 pt-0.5">{toCity}</p>
         </div>
         <div className="border-r border-slate-100 px-2">
           <span className="text-[10px] font-bold text-slate-400 uppercase block">Dates</span>
-          <input type="text" value={stayDates} onChange={(e) => setStayDates(e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent focus:outline-none w-full pt-0.5" />
+          <p className="text-sm font-bold text-indigo-600 pt-0.5">{stayDates}</p>
         </div>
         <div className="border-r border-slate-100 px-2">
           <span className="text-[10px] font-bold text-slate-400 uppercase block">Guests & Rooms</span>
-          <p className="text-sm font-bold text-slate-800">1 Room, 2 Guests</p>
+          <p className="text-sm font-bold text-slate-800 pt-0.5">1 Room, 2 Guests</p>
         </div>
-        <button type="submit" disabled={isLoading} className="bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50">
-          {isLoading ? "Searching Stays..." : "Search Hotels"}
+        <button className="bg-[#4f46e5] text-white font-bold text-xs py-3 rounded-xl shadow-md opacity-50 cursor-not-allowed">
+          Connected
         </button>
-      </form>
+      </div>
 
       {/* ૩. કેટેગરીઝ ફિલ્ટર ટેબ્સ */}
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
@@ -174,7 +193,7 @@ export default function Hotels({ sharedData, liveData, isLoading }) {
         {isLoading ? (
           <div className="bg-white p-12 rounded-2xl border border-slate-100 text-center space-y-3 shadow-sm">
             <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs font-bold text-slate-500 animate-pulse">Aggregating live luxury stays for {toCity}...</p>
+            <p className="text-xs font-bold text-slate-500 animate-pulse">Aggregating live stays for {toCity}...</p>
           </div>
         ) : filteredHotels.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-xs font-bold text-slate-400 shadow-sm">

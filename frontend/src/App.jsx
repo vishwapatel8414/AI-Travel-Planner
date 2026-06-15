@@ -183,6 +183,21 @@ export default function App() {
           
         </div>
       </main>
+      {/* 📱 ફોન માટે સ્પેશિયલ બોટમ મેનુ પટ્ટી - તારો કોઈ જૂનો કોડ બદલ્યા વગર આ ખાલી નીચે ઉમેરી દે */}
+<div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex justify-around items-center z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+  <button onClick={() => setActiveTab("HOME")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider ${activeTab === "HOME" ? "text-[#4f46e5]" : "text-slate-400"}`}>
+    <span className="text-lg">🏠</span>HOME
+  </button>
+  <button onClick={() => setActiveTab("FLIGHTS")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider ${activeTab === "FLIGHTS" ? "text-[#4f46e5]" : "text-slate-400"}`}>
+    <span className="text-lg">✈️</span>FLIGHTS
+  </button>
+  <button onClick={() => setActiveTab("HOTELS")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider ${activeTab === "HOTELS" ? "text-[#4f46e5]" : "text-slate-400"}`}>
+    <span className="text-lg">🏨</span>HOTELS
+  </button>
+  <button onClick={() => setActiveTab("PLACES")} className="flex flex-col items-center gap-1 text-[10px] font-black">
+          <span className="text-lg">📍</span>PLACES
+        </button>
+      </div>
 
     </div>
   );

@@ -25,10 +25,14 @@ export default function App() {
   // 🔑 .env માંથી Groq API Key લોડ કરવી
   const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
-  // 🛠️ હોમ પેજ પરથી સર્ચ થાય ત્યારે આ મેઈન ફંક્શન રન થશે
+  // 🛠️ હોમ પેજ કે અન્ય કોઈ પણ પેજ પરથી સર્ચ થાય ત્યારે આ મેઈન ફંક્શન રન થશે
   const handlePlanSearch = async (data) => {
     setSharedSearchData(data);
-    setActivePage("Trip Planner"); // યુઝરને તરત જ પ્લાનર પેજ પર મોકલો
+    
+    // જો યુઝર હોમ પેજ પર હોય તો જ એને ડાયરેક્ટ "Trip Planner" પર મોકલો
+    if (activePage === "Home") {
+      setActivePage("Trip Planner");
+    }
     
     // બેકગ્રાઉન્ડમાં આખા પ્રોજેક્ટનો અસલી ડેટા લોડ કરવો
     await fetchCompleteDynamicPlan(data.destination, data.budget || "Budget Friendly", data.days || 3);
@@ -90,6 +94,7 @@ export default function App() {
     } catch (err) {
       console.error("Master AI Error:", err);
     } finally {
+      // 🎯 અહીં સ્પેલિંગ ફિક્સ થઈ ગયો ભાઈ!
       setAiLoading(false);
     }
   };
@@ -97,7 +102,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen bg-[#F8FAFC] text-[#1E293B] font-sans antialiased overflow-x-hidden">
       
-      {/* ૧. સાઇડબાર મેનુ */}
+      {/* ૧. સાઇડબાર મેનુ (ડેસ્કટોપ માટે તારી ઓરિજિનલ ડિઝાઇન) */}
       <Sidebar activePage={activePage} setActivePage={setActivePage} />
 
       <main className="flex-1 lg:pl-72 p-4 md:p-8 pb-24 md:pb-8">
@@ -149,7 +154,7 @@ export default function App() {
           {activePage === "Flights" && (
             <>
               <div className="xl:col-span-3">
-                <Flights sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} />
+                <Flights sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} onSearchSubmit={handlePlanSearch} />
               </div>
               <div className="xl:col-span-1 sticky top-6 h-fit">
                 <FlightSummary liveData={liveTravelData} />
@@ -161,7 +166,7 @@ export default function App() {
           {activePage === "Hotels" && (
             <>
               <div className="xl:col-span-3">
-                <Hotels sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} /> 
+                <Hotels sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} onSearchSubmit={handlePlanSearch} /> 
               </div>
               <div className="xl:col-span-1 sticky top-6 h-fit">
                 <HotelSidebar liveData={liveTravelData} />
@@ -173,7 +178,7 @@ export default function App() {
           {activePage === "Places" && (
             <>
               <div className="xl:col-span-3">
-                <Places sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} />
+                <Places sharedData={sharedSearchData} liveData={liveTravelData} isLoading={aiLoading} onSearchSubmit={handlePlanSearch} />
               </div>
               <div className="xl:col-span-1 sticky top-6 h-fit">
                 <PlacesSidebar liveData={liveTravelData} />
@@ -184,7 +189,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* 📱 ફોન માટે સ્પેશિયલ બોટમ મેનુ પટ્ટી - તારા અસલી સ્ટેટ્સ (activePage) સાથે ૧૦૦% કનેક્ટેડ */}
+      {/* 📱 ફોન માટે સ્પેશિયલ બોટમ મેનુ પટ્ટી */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex justify-around items-center z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
         <button onClick={() => setActivePage("Home")} className={`flex flex-col items-center gap-1 text-[10px] font-black tracking-wider transition-all ${activePage === "Home" ? "text-[#4f46e5] scale-105" : "text-slate-400"}`}>
           <span className="text-lg">🏠</span>HOME

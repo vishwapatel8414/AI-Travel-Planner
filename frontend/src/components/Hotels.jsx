@@ -19,16 +19,14 @@ export default function Hotels({ sharedData, liveData, isLoading, onSearchSubmit
   const imagesPool = [
     "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
     "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80"
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80"
   ];
 
-  // 🎯 ૩ થી ૪ શાનદાર હોટેલોનું કાયમી લિસ્ટ સેટ કરી દીધું
-  const displayHotels = liveData?.hotels || [
+  // 🎯 સેફ પ્રોટેક્શન: હોટેલ એરે પ્રોપર ચેક થશે
+  const displayHotels = liveData && Array.isArray(liveData.hotels) ? liveData.hotels : [
     { hotel_name: `The Oberoi ${toCity}`, address: "Worli, Sea Face Enclave", rating: "5.0", price_per_night_in_inr: "25000" },
     { hotel_name: `Grand Hyatt Luxury Stay`, address: "BKC Business Hub", rating: "4.8", price_per_night_in_inr: "14500" },
-    { hotel_name: `Taj Lands End Resort`, address: "Bandora Bandstand", rating: "4.9", price_per_night_in_inr: "21000" },
-    { hotel_name: `Ginger Budget Comfort`, address: "Near Domestic Airport", rating: "4.2", price_per_night_in_inr: "3800" }
+    { hotel_name: `Taj Lands End Resort`, address: "Bandora Bandstand", rating: "4.9", price_per_night_in_inr: "21000" }
   ];
 
   return (
@@ -56,13 +54,14 @@ export default function Hotels({ sharedData, liveData, isLoading, onSearchSubmit
             <img src={imagesPool[idx % imagesPool.length]} alt="hotel" className="w-full sm:w-48 h-36 object-cover rounded-xl" />
             <div className="flex-1 flex flex-col justify-between">
               <div>
-                <h3 className="text-base font-black text-slate-800">{hotel.hotel_name}</h3>
-                <p className="text-[11px] text-slate-400 font-semibold">📍 {hotel.address}</p>
-                <p className="text-xs font-bold text-slate-700 mt-1">⭐ {hotel.rating} / 5.0 Rating</p>
+                <h3 className="text-base font-black text-slate-800">{hotel.hotel_name || "Hotel Name"}</h3>
+                <p className="text-[11px] text-slate-400 font-semibold">📍 {hotel.address || "Address"}</p>
+                <p className="text-xs font-bold text-slate-700 mt-1">⭐ {hotel.rating || "4.5"} / 5.0 Rating</p>
               </div>
               <div className="flex justify-between items-end border-t border-slate-50 pt-2 mt-2">
-                <p className="text-base font-black text-slate-800"> can ₹{hotel.price_per_night_in_inr} <span className="text-[10px] text-slate-400 font-bold">/ night</span></p>
-                <button className="bg-[#4f46e5] text-white font-bold text-xs py-1.5 px-4 rounded-xl shadow-sm">Book Room</button>
+                <p className="text-base font-black text-slate-800">₹{hotel.price_per_night_in_inr || hotel.price || "5000"} <span className="text-[10px] text-slate-400 font-bold">/ night</span></p>
+                {/* 🎯 સેફ ક્લિક બટન */}
+                <button type="button" onClick={() => alert(`Booking ${hotel.hotel_name || 'Hotel'}`)} className="bg-[#4f46e5] text-white font-bold text-xs py-1.5 px-4 rounded-xl shadow-sm">Book Room</button>
               </div>
             </div>
           </div>

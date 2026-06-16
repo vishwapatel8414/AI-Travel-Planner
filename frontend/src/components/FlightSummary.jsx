@@ -1,6 +1,6 @@
 import React from "react";
 export default function FlightSummary({ liveData }) {
-  const dest = liveData?.destination || "Mumbai";
+  const dest = liveData?.destination || sharedData?.destination || "Mumbai";
   return (
     <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
       <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider">🗺️ Trip Summary</h3>
